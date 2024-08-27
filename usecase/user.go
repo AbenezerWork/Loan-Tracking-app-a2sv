@@ -80,23 +80,38 @@ func (v *UserUsecase) GenerateVerificationToken(user *domain.VerificationClaims)
 	return nil
 }
 
-func (v *UserUsecase) ForgotPassword(email *domain.Email) error {
-	user := &domain.VerificationClaims{
-		Email: email.Email,
-	}
-	token, err := v.jwtSvc.GenerateValidationToken(user)
+func (v *UserUsecase) ForgotPassword(userdata *domain.VerificationClaims) error {
+	fmt.Println(userdata)
+	user, err := v.GetUserByEmail(&userdata.Email)
 	if err != nil {
 		return err
 	}
-	utils.SendForgotPasswordTokenEmail(user.Email, token)
+	veruser := &domain.VerificationClaims{
+		ID:       user.ID,
+		Email:    user.Email,
+		Name:     user.Name,
+		Password: user.Password,
+		Role:     user.Role,
+	}
+	token, err := v.jwtSvc.GenerateValidationToken(veruser)
+	if err != nil {
+		return err
+	}
+	fmt.Println("email: ", user.Email)
+	err = utils.SendForgotPasswordTokenEmail(user.Email, token)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (v *UserUsecase) VerifyForgotPassword(token string) (*domain.VerificationClaims, error) {
-	claims, err := v.jwtSvc.ValidateToken(token)
+	claims, err := v.jwtSvc.ValidateValidateToken(token)
 	if err != nil {
 		return &domain.VerificationClaims{}, err
 	}
+
+	v.UpdateUser(claims.Name, claims.Password)
 
 	return claims, nil
 }

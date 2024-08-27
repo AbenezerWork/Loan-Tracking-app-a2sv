@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID          primitive.ObjectID `json:"id"`
+	ID          primitive.ObjectID `json:"id"  bson:"_id,omitempty"`
 	Name        string             `json:"name"`
 	Email       string             `json:"email"`
 	Role        string             `json:"role"`
@@ -28,7 +28,7 @@ type ForgotClaims struct {
 
 type VerificationClaims struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id"`
-	Email    string             `json:"username"`
+	Email    string             `json:"email"`
 	Name     string             `json:"name"`
 	Password string             `json:"password"`
 	Role     string             `json:"role"`
@@ -46,7 +46,7 @@ type UserUsecaseInterface interface {
 	GetUserByEmail(email *string) (*User, error)
 	VerifyUser(token string) error
 	Login(user *AuthUser) (string, string, error)
-	ForgotPassword(user *Email) error
+	ForgotPassword(*VerificationClaims) error
 	VerifyForgotPassword(token string) (*VerificationClaims, error)
 
 	GetAllUsers() ([]*User, error)

@@ -18,15 +18,23 @@ func InitRoutes(r *gin.Engine, client *mongo.Client) {
 
 	userCollection := client.Database("Loan-Tracker").Collection("Users")
 	tokenCollection := client.Database("Loan-Tracker").Collection("Tokens")
+	loanCollection := client.Database("Loan-Tracker").Collection("Loans")
 
 	userMockCollection := repository.NewMongoCollection(userCollection)
 	tokenMockCollection := repository.NewMongoCollection(tokenCollection)
+	loanMockCollection := repository.NewMongoCollection(loanCollection)
 
 	userRepo := repository.NewUserRepository(userMockCollection)
 	tokenRepo := repository.NewTokenRepository(tokenMockCollection)
+	loanRepo := repository.NewLoanRepository(loanMockCollection)
 
 	userUsecase := usecase.NewUserUsecase(jwtService, userRepo, tokenRepo)
+	loanUsecase := usecase.NewLoanUseCase(loanRepo)
+	tokenUsecase := usecase.NewTokenUsecase(tokenRepo, *jwtService)
 
 	NewSignupRouter(r, userUsecase)
+	NewUserRouter(r, userUsecase, *jwtService)
+	NewLoanRouter(r, loanUsecase, *jwtService)
+	NewRefreshTokenRouter(r, userUsecase, tokenUsecase, *jwtService)
 
 }

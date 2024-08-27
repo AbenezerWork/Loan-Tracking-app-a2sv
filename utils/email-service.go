@@ -43,16 +43,9 @@ func SendForgotPasswordTokenEmail(email, token string) error {
 	m.SetHeader("From", os.Getenv("SMTP_USER"))
 	m.SetHeader("To", email)
 	m.SetHeader("Subject", "Your confimation link")
-	body := fmt.Sprintf(`
-        <h2>Hello,</h2>
-        <p>Click the link below to reset your password:</p>
-        <a href="http://localhost:5000/users/password-reset/%v">confirm email</a>
-        <br><br>
-        <p>Thank you!</p>
-    `, token)
 
 	// Set the body content as HTML
-	m.SetBody("text/html", body)
+	m.SetBody("text/plain", token)
 
 	// Set up the SMTP server
 	d := gomail.NewDialer(os.Getenv("SMTP_HOST"), 587, os.Getenv("SMTP_USER"), os.Getenv("SMTP_PASS"))
